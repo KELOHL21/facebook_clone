@@ -1,0 +1,71 @@
+.loginWrapper{
+   scroll-behavior: smooth;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   min-height: 100vh;
+   background: cornflowerblue;
+   transition: 0.5s;
+ }
+ 
+ .loginContainer{
+   position: relative;
+   height: 500px;
+   width: 800px;
+   margin: 20px;
+ }
+
+ .background{
+   position: absolute;
+   top: 40px;
+   width: 100%;
+   height: 420px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background: rgba(0, 0, 0, 0.2);
+   box-shadow: 0 5px 45px rgba(0,0,0,0.15);
+ }
+ 
+ .background .signin_box{
+   position:relative;
+   flex-direction: column;
+   width:50%;
+   height: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+ }
+
+ .background .signin_box h2{
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+
+  }
+
+  .background .signin_box .signinBtn{
+        cursor: pointer;
+        padding:10px 20px;
+        background-color: white;
+        color: #333;
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+    }
+
+    // .formbox{
+    //   position: absolute;
+    //   top: 0;
+    //   left: 0;
+    //   width: 50%;
+    //   height: 100%;
+    //   background:rgb(0, 0, 0);
+    //   z-index:1000;
+    //   display: flex;
+    //   justify-content: center;
+    //   align-items: center;
+    //   box-shadow: 0 5px 45px rgba(0,0,0,0.25);
+    //   transition: 0.5s ease-in-out;
+    // }
