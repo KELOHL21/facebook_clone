@@ -1,8 +1,13 @@
-import Image from 'next/image'
-import {useSession} from 'next-auth/react'
-import {BsEmojiSmile} from 'react-icons/bs'
-import {FaVideo} from 'react-icons/fa'
-import {MdPhotoCamera} from 'react-icons/md'
+import Image from 'next/image';
+import {useSession} from 'next-auth/react';
+import {BsEmojiSmile} from 'react-icons/bs';
+import {FaVideo} from 'react-icons/fa';
+import {MdPhotoCamera} from 'react-icons/md';
+import { useRef, useState } from 'react';
+import   { db,storage }   from '../../firebase';
+// import { collection, addDoc } from "firebase/firestore"; 
+import { addDoc , collection, doc, serverTimestamp, updateDoc } from "firebase/firestore"; 
+import {getDownloadURL, ref, uploadString} from '@firebase/storage'
 
 
 
@@ -10,11 +15,121 @@ const InputBox = () => {
 
    const { data:session } = useSession();
 
-   const submitPost = (e) => {
-      // Preventing reload when button is clicked
-      e.preventDefault();
+   const [post, setPost] = useState ('') ;
 
+   const[loading, setLoading] = useState(false);
+
+   const filePicker = useRef(null);
+
+   const[selectedFile,setSelectedFile]=useState(null)
+
+   const handlePost = async () => { 
+ 
+      if (loading) return ;
+
+      setLoading(true);
+
+      const docRef = await addDoc(collection(db, 'posts'),{
+         //User Input
+         message:post,
+         name:session.user.name,
+         email:session.user.email,
+         image:session.user.image,
+         timestamp:serverTimesramp(),
+
+      });
+
+      const imageRef = ref(storage, `post/${docRef.name}/image` ) ;
+
+      if (selectedFile) {
+         await uploadString(imageRef,selectedFile,'data_url').then(async () => {
+            const downloadURL= await getDownloadURL(imageRef)
+            await updateDoc(doc(db,'posts',docRef.name),{
+               image:downloadURL,
+            })
+         })
+      }
+
+      setLoading(false);
+      setPost("");
+      setSelectedFile(null);
+
+      const addImageToPostn = (e) => {
+         const reader = new FileReader();
+         if(e.target.files[0]){
+            reader.readAsDataURL(e.target.files[0]);
+         }
+
+         reader.onload = (readerEvent) => {
+            setSelectedFile
+         }
+         
+      }
+
+      // e.preventDefault();
+
+      // const CollectionReference= collection(db, 'posts');
+
+      // const payload = {
+      //    //User Input
+      //    message:post,
+      //    name:session.user.name,
+      //    email:session.user.email,
+      //    image:session.user.image,
+      // }
+
+      // await addDoc(CollectionReference, payload)
    }
+
+
+   // Functionallity to allow input-value into the input field
+   // const inputRef = useRef(null);
+
+   // async function submitPost(e){
+   //    // Preventing reload when button is clicked
+   //    e.preventDefault();
+
+   //    if (!inputRef.current.value) return;
+
+
+   //    // Db Object
+
+   //    // Add a new document in collection "cities"
+   //    await setDoc(doc(db, "posts"), {
+
+   //       //User Input
+   //       message:inputRef.current.value,
+   //       name:session.user.name,
+   //       email:session.user.email,
+   //       image:session.user.image,
+   //    });
+
+   //    // // Add a new document with a generated id.
+   //    // const docRef = await  addDoc(collection(db, "posts"), {
+
+   //    //    //User Input
+   //    //    message:inputRef.current.value,
+   //    //    name:session.user.name,
+   //    //    email:session.user.email,
+   //    //    image:session.user.image,
+
+   //    // });
+
+
+   //    // db.collection('posts').add({
+   //    //    //User Input
+   //    //    message:inputRef.current.value,
+   //    //    name:session.user.name,
+   //    //    email:session.user.email,
+   //    //    image:session.user.image,
+   //    //    // using database
+   //    //    timestamp:firebase.firestore.FieldValue.serverTimestamp()
+   //    // });
+
+   //       inputRef.current.value='';
+   
+
+   // }
 
    return ( 
 
@@ -30,11 +145,16 @@ const InputBox = () => {
                alt='/' 
             />       
                
-            <form className='flex flex-1 '>
+            <form className='flex flex-1 'onSubmit={handlePost}>
 
-               <input type='text' className='rounded-full h-12 bg-gray-100 flex-grow px-5 focus:outline-none' placeholder={`Whats on your mind ${session.user.name}?` }/>
+               <input 
+               type='text' 
+               className='rounded-full h-12 bg-gray-100 flex-grow px-5 focus:outline-none' 
+               value={post}
+               onChange= {(e) => setPost(e.target.value)}
+               placeholder={`Whats on your mind ${session.user.name}?`}/>
 
-               <button hidden type='submit' onClick={submitPost}>Submit</button>
+               <button hidden type='submit'>Submit</button>
 
             </form>
 
@@ -56,11 +176,7 @@ const InputBox = () => {
                <p className='text-xs sm:text-sm xl:text-base'>Feelings/Activity</p>
             </div>
          </div>
-        
-
-         
-
-
+   
       </div>
     );
 }
